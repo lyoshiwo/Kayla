@@ -15,16 +15,3 @@ temp = np.zeros((len(list_temp[0])))
 for i in list_temp:
     temp += i
 temp /= len(list_temp)
-
-wf = open("all.csv", "w")
-wf.write("qid,uid,label\n")
-rf = open('submit/final2.csv', 'r')
-lines = rf.readlines()
-count = 0
-for line in lines[1:]:
-    kk=line.split(',')
-    wf.write(kk[0] + ','+kk[1]+',' + str(temp[count]) + '\n')
-    count += 1
-
-wf.close()
-rf.close()
