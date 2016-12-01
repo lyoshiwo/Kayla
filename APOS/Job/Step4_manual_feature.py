@@ -192,7 +192,7 @@ if __name__ == "__main__":
     y_position = get_y_by_name('predict_position_name')
     y_size = get_y_by_name('predict_size')
     y_salary = get_y_by_name('predict_salary')
-    pd.to_pickle([X_data, y_position, y_size, y_salary], 'pickle/x_position.pkl')
+    pd.to_pickle([X_data, y_position, y_size, y_salary], 'pickle/manual_position_size_salary.pkl')
     param = dict()
     param['objective'] = 'multi:softmax'
     param['eta'] = 0.03
