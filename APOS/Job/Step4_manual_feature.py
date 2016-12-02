@@ -177,11 +177,6 @@ if __name__ == "__main__":
                 print i, z, train_X[i][z], mapper.features[z]
                 train_X[i][z] = 0
             train_X[i][z] = int(train_X[i][z])
-    enc = preprocessing.OneHotEncoder()
-    enc.fit(train_X)
-    X_data = enc.transform(train_X)
-    print X_data[0]
-    X_data = train_X
 
 
     def get_y_by_name(name):
@@ -190,9 +185,14 @@ if __name__ == "__main__":
 
 
     y_position = get_y_by_name('predict_position_name')
-    y_size = get_y_by_name('predict_size')
-    y_salary = get_y_by_name('predict_salary')
-    pd.to_pickle([X_data, y_position, y_size, y_salary], 'pickle/manual_position_size_salary.pkl')
+    # y_size = get_y_by_name('predict_size')
+    # y_salary = get_y_by_name('predict_salary')
+    # pd.to_pickle([train_X, y_position, y_size, y_salary], 'pickle/manual_position_size_salary.pkl')
+    enc = preprocessing.OneHotEncoder()
+    enc.fit(train_X)
+    X_data = enc.transform(train_X)
+    print X_data[0]
+    X_data = train_X
     param = dict()
     param['objective'] = 'multi:softmax'
     param['eta'] = 0.03
