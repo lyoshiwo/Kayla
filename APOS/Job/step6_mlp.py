@@ -12,6 +12,11 @@ from sklearn import preprocessing
 import numpy as np
 
 [x, y, _, _] = pd.read_pickle('pickle/manual_position_size_salary.pkl')
+count = 0
+for i in range(x.shape[1]):
+    count += x[:, i].max() + 1
+    x[:, i] += count
+
 # enc = preprocessing.OneHotEncoder()
 # enc.fit(x)
 # x = enc.transform(x)
@@ -21,21 +26,25 @@ X_train, X_test, Y_train, Y_test = train_test_split(x, y_, test_size=0.33, rando
 
 #
 #
-# # 38 epoch,0.456
+# # 27 epoch 0.461, 10 dim
+# 18 epoch 0.4628, 20 dim two level
+# 18 epoch 0.4653, 20 dim three level 0.5 dropout
+# trainable=False 0.42
 def mlp():
     # from keras.regularizers import l1
     model = Sequential()
-    model.add(Embedding(x.max() + 2, 10, input_length=x.shape[1]))
+    model.add(Embedding(x.max() + 1, 20, input_length=x.shape[1], trainable=False))
     model.add(Flatten())
-    # model.add(Dense(128))
-    # model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(128))
+    model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(len(set(y))))
     model.add(Activation('softmax'))
     rms = RMSprop()
     model.compile(loss='categorical_crossentropy', optimizer=rms, metrics=["accuracy"])
     batch_size = 1024
-    nb_epoch = 1000
+    nb_epoch = 300
     model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test))
     model.summary()
@@ -44,7 +53,7 @@ def mlp():
     print('Test accuracy:', score[1])
 
 
-# mlp()
+mlp()
 
 
 def mlp2():
@@ -86,8 +95,7 @@ def mlp2():
     print('Test score:', score[0])
     print('Test accuracy:', score[1])
 
-
 # all_data = np.zeros((x.shape[0],feature_num))
 
-
-mlp2()
+# can not be initial, because the first level is too huge
+# mlp2()
