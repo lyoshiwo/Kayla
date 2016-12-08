@@ -28,7 +28,7 @@ if __name__ == "__main__":
     id_text = read_dict('pickle/' + 'id_texts.pkl')
     texts = id_text.values()
     features, words = 30, 14
-    if os.path.exists('pickle/' + str(features) + 'features_1minwords_' + str(words) + 'context.pkl') is False:
+    if os.path.exists('pickle/' + str(features) + 'features_1minwords_' + str(words) + 'text.pkl') is False:
         # Set values for various parameters
         num_features = features  # Word vector dimensionality
         min_word_count = 1  # Minimum word count
@@ -41,7 +41,7 @@ if __name__ == "__main__":
                          size=num_features, min_count=min_word_count, \
                          window=context, sample=down_sampling, seed=1, negative=1)
         model.init_sims(replace=True)
-        word2vec_path = 'pickle/' + str(features) + 'features_1minwords_' + str(words) + 'context.pkl'
+        word2vec_path = 'pickle/' + str(features) + 'features_1minwords_' + str(words) + 'text.pkl'
         model.save(word2vec_path)
 
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         print 'create c_v_all'
         import numpy
 
-        word2vec_path = 'pickle/' + str(features) + 'features_1minwords_' + str(words) + 'context.pkl'
+        word2vec_path = 'pickle/' + str(features) + 'features_1minwords_' + str(words) + 'text.pkl'
         model = Word2Vec.load(word2vec_path)
         id_sentence = read_dict(sentence_dict_path)
         sentence = id_sentence.values()
@@ -78,7 +78,7 @@ if __name__ == "__main__":
                         print section, (temp_vec / used)[0:2]
         write_dic(c_vec, 'pickle/' + 'c_v_all.pkl')
     k_clusters = 128
-    if os.path.exists('pickle/' + 'c_k_all_' + str(k_clusters) + '.pkl') is False:
+    if os.path.exists('pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl') is False:
         print 'create c_k_all'
         c_vec = read_dict('pickle/' + 'c_v_all.pkl')
         c_key = c_vec.keys()
@@ -92,9 +92,9 @@ if __name__ == "__main__":
             if 13 > k_labels[index] > 10:
                 print c_key[index], k_labels[index]
         print len(dict_temp)
-        write_dic(dict_temp, 'pickle/' + 'c_k_all_' + str(k_clusters) + '.pkl')
+        write_dic(dict_temp, 'pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl')
     k_clusters = 64
-    if os.path.exists('pickle/' + 'c_k_all_' + str(k_clusters) + '.pkl') is False:
+    if os.path.exists('pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl') is False:
         print 'create c_k_all'
         c_vec = read_dict('pickle/' + 'c_v_all.pkl')
         c_key = c_vec.keys()
@@ -108,8 +108,8 @@ if __name__ == "__main__":
             if 13 > k_labels[index] > 10:
                 print c_key[index], k_labels[index]
         print len(dict_temp)
-        write_dic(dict_temp, 'pickle/' + 'c_k_all_' + str(k_clusters) + '.pkl')
-c_k_all = read_dict('pickle/' + 'c_k_all_' + str(k_clusters) + '.pkl')
+        write_dic(dict_temp, 'pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl')
+c_k_all = read_dict('pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl')
 set_cluster = set(c_k_all.values())
 set_cluster = list(set_cluster)
 flg = range(10)
