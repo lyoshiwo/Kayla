@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# encoding=utf8
 __author__ = 'lin_eo'
 from util import read_dict, write_dic
 import jieba
