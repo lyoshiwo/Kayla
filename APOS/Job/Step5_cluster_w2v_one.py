@@ -121,20 +121,25 @@ if __name__ == "__main__":
     w2c_f, w2c_w = 10, 14
     # output the id_sentences data to local, it is a dictionary. A sentence means a json resume
     # sentence_dict_path = 'pickle/id_sentences.pkl'
-    word2vec_path = 'pickle/' + str(w2c_f) + 'features_1minwords_' + str(w2c_w) + 'context.pkl'
     # train_w2vector(w2c_f, w2c_w, sentence_dict_path, word2vec_path)
+    word2vec_path = 'pickle/' + str(w2c_f) + 'features_1minwords_' + str(w2c_w) + 'context.pkl'
     model = Word2Vec.load(word2vec_path)
     c_key = model.vocab.keys()
     c_vec = [model[i] for i in c_key]
-    vec_set = c_vec.values()
-    k_clusters = 64
-    KMeans_model = KMeans(n_clusters=k_clusters, n_init=5)
-    KMeans_model.fit(vec_set)
-    k_labels = KMeans_model.labels_
-    dict_temp = {}
-    for index in range(len(c_vec)):
-        dict_temp.setdefault(c_key[index], k_labels[index])
-        if 13 > k_labels[index] > 10:
-            print c_key[index], k_labels[index]
-    print len(dict_temp)
-    write_dic(dict_temp, 'pickle/' + 'cluster_two_' + str(k_clusters) + '.pkl')
+
+
+    def get_cluster(k_clusters):
+        KMeans_model = KMeans(n_clusters=k_clusters, n_init=5)
+        KMeans_model.fit(c_vec)
+        k_labels = KMeans_model.labels_
+        dict_temp = {}
+        for index in range(len(c_vec)):
+            dict_temp.setdefault(str(c_key[index]).decode('utf-8'), k_labels[index])
+            if 13 > k_labels[index] > 10:
+                print c_key[index], k_labels[index]
+        print len(dict_temp)
+        write_dic(dict_temp, 'pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl')
+
+
+    get_cluster(128)
+    get_cluster(64)

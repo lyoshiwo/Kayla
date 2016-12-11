@@ -78,7 +78,7 @@ if __name__ == "__main__":
                         print section, (temp_vec / used)[0:2]
         write_dic(c_vec, 'pickle/' + 'c_v_all.pkl')
     k_clusters = 128
-    if os.path.exists('pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl') is False:
+    if os.path.exists('pickle/' + 'cluster_two_' + str(k_clusters) + '.pkl') is False:
         print 'create c_k_all'
         c_vec = read_dict('pickle/' + 'c_v_all.pkl')
         c_key = c_vec.keys()
@@ -88,13 +88,13 @@ if __name__ == "__main__":
         k_labels = KMeans_model.labels_
         dict_temp = {}
         for index in range(len(c_vec)):
-            dict_temp.setdefault(c_key[index], k_labels[index])
+            dict_temp.setdefault(str(c_key[index]).decode('utf-8'), k_labels[index])
             if 13 > k_labels[index] > 10:
                 print c_key[index], k_labels[index]
         print len(dict_temp)
-        write_dic(dict_temp, 'pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl')
+        write_dic(dict_temp, 'pickle/' + 'cluster_two_' + str(k_clusters) + '.pkl')
     k_clusters = 64
-    if os.path.exists('pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl') is False:
+    if os.path.exists('pickle/' + 'cluster_two_' + str(k_clusters) + '.pkl') is False:
         print 'create c_k_all'
         c_vec = read_dict('pickle/' + 'c_v_all.pkl')
         c_key = c_vec.keys()
@@ -108,8 +108,8 @@ if __name__ == "__main__":
             if 13 > k_labels[index] > 10:
                 print c_key[index], k_labels[index]
         print len(dict_temp)
-        write_dic(dict_temp, 'pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl')
-c_k_all = read_dict('pickle/' + 'cluster_one_' + str(k_clusters) + '.pkl')
+        write_dic(dict_temp, 'pickle/' + 'cluster_two_' + str(k_clusters) + '.pkl')
+c_k_all = read_dict('pickle/' + 'cluster_two_' + str(k_clusters) + '.pkl')
 set_cluster = set(c_k_all.values())
 set_cluster = list(set_cluster)
 flg = range(10)

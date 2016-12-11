@@ -100,7 +100,6 @@ def extract_major(sentense):
             l = sentense.find(bracket[0])
         if sentense.find(bracket[1]) != -1:
             r = sentense.find(bracket[1])
-
         if l != -1 and r != -1:
             return sentense[:l], sentense[l + len(bracket[0]):r]
         else:

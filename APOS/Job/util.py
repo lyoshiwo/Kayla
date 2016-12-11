@@ -3,6 +3,8 @@ import sys
 import os
 import json
 import datetime
+from sklearn_pandas import DataFrameMapper
+from sklearn.preprocessing import LabelEncoder
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -30,12 +32,12 @@ if os.path.exists(txt_prefix) is False:
 if os.path.exists(raw_data_prefix) is False:
     os.mkdir(raw_data_prefix)
 
-if os.path.exists(raw_data_prefix+'practice.json') is False:
+if os.path.exists(raw_data_prefix + 'practice.json') is False:
     from colorama import init, Fore
 
     init(autoreset=True)
     # 通过使用autoreset参数可以让变色效果只对当前输出起作用，输出完成后颜色恢复默认设置
-    print Fore.RED+'please download the practice json from'
+    print Fore.RED + 'please download the practice json from'
     print 'http://pan.baidu.com/s/1gfLkfj9'
     print 'practice.json to file named as raw_data'
 
@@ -116,6 +118,92 @@ def read_file(file_path):
     except Exception, e:
         print e.message
         return {}
+
+
+def get_mapper(data_all):
+    param_list = [
+        # ('id', None),
+        ('major', LabelEncoder()),
+        ('age', None),
+        ('gender', LabelEncoder()),
+        ('degree', LabelEncoder()),
+        # cut major into two parts if major can be cut
+        ('major_1', LabelEncoder()),
+        ('major_2', LabelEncoder()),
+
+        # cut position into two parts if position can be cut
+        ('last_position_name_1', LabelEncoder()),
+        ('second_position_name_1', LabelEncoder()),
+        ('first_position_name_1', LabelEncoder()),
+
+        ('last_position_name_2', LabelEncoder()),
+        ('second_position_name_2', LabelEncoder()),
+        ('first_position_name_2', LabelEncoder()),
+        # test by rule if there are English or words shows degrees
+        ('isenglish', None),
+        ('isjunior', None),
+        ('isbachelor', None),
+        ('ismaster', None),
+        ('isintern', None),
+        ('total_previous_job', None),
+        ('last_size', None),
+        ('last_salary', None),
+        ('last_position_name', LabelEncoder()),
+        ('last_start_year', None),
+        ('last_start_month', None),
+        ('last_end_year', None),
+        ('last_end_month', None),
+        ('last_interval_month', None),
+        ('second_size', None),
+        ('second_salary', None),
+        ('second_position_name', LabelEncoder()),
+        ('second_start_year', None),
+        ('second_start_month', None),
+        ('second_end_year', None),
+        ('second_end_month', None),
+        ('second_interval_month', None),
+        ('first_size', None),
+        ('first_salary', None),
+        ('first_position_name', LabelEncoder()),
+        ('first_start_year', None),
+        ('first_start_month', None),
+        ('first_end_year', None),
+        ('first_end_month', None),
+        ('first_interval_month', None),
+        ('last_second_interval_month', None),
+        ('diff_last_second_salary', LabelEncoder()),
+        ('diff_last_second_size', LabelEncoder()),
+        ('diff_last_second_position_name', LabelEncoder()),
+        ('total_interval_month', None),
+        ('diff_salary', LabelEncoder()),
+        ('diff_size', LabelEncoder()),
+        ('diff_position_name', LabelEncoder()),
+
+        ('start_working_age', None),
+        ('pre_working_month', None),
+        ("pre_largest_size", None),
+        ("pre_largest_salary", None),
+        ("pre_least_size", None),
+        ("pre_least_salary", None),
+        ("pre_size1", None),
+        ("pre_size2", None),
+        ("pre_size3", None),
+        ("pre_size4", None),
+        ("pre_size5", None),
+        ("pre_size6", None),
+        ("pre_size7", None),
+        ("pre_salary1", None),
+        ("pre_salary2", None),
+        ("pre_salary3", None),
+        ("pre_salary4", None),
+        ("pre_salary5", None),
+        ("pre_salary6", None),
+        ("pre_salary7", None),
+    ]
+    print "the mapper's param list is %s" % (len(param_list))
+    mapper = DataFrameMapper(param_list)
+    mapper.fit(data_all)
+    return mapper
 
 
 # 文件写出，主要是字典文件
