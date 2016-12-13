@@ -23,6 +23,8 @@ for i in range(x.shape[1]):
 y_ = np_utils.to_categorical(y, len(set(y)))
 X_train, X_test, Y_train, Y_test = train_test_split(x, y_, test_size=0.33, random_state=713)
 
+Y_tr, Y_te = train_test_split(y, test_size=0.33, random_state=713)
+
 
 #
 #
@@ -41,7 +43,7 @@ def mlp0():
     rms = RMSprop()
     model.compile(loss='categorical_crossentropy', optimizer=rms, metrics=["accuracy"])
     batch_size = 1024
-    nb_epoch = 300
+    nb_epoch = 20
     model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test))
     model.summary()
@@ -56,8 +58,9 @@ def mlp0():
 
 def mlp1():
     # from keras.regularizers import l1
+    import theano
     model = Sequential()
-    model.add(Embedding(x.max() + 1, 20, input_length=x.shape[1]))
+    model.add(Embedding(x.max() + 1, 100, input_length=x.shape[1]))
     model.add(Flatten())
     model.add(Dropout(0.5))
     model.add(Dense(128))
@@ -68,13 +71,23 @@ def mlp1():
     rms = RMSprop()
     model.compile(loss='categorical_crossentropy', optimizer=rms, metrics=["accuracy"])
     batch_size = 1024
-    nb_epoch = 300
+    nb_epoch = 7
     model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test))
     model.summary()
     score = model.evaluate(X_test, Y_test)
     print('Test score:', score[0])
     print('Test accuracy:', score[1])
+    get_feature = theano.function([model.layers[0].input], model.layers[0].output, allow_input_downcast=True)
+    new_go = get_feature(X_train)
+    new_train = new_go.reshape([new_go.shape[0], new_go.shape[1] * new_go.shape[2]])
+    new_test = get_feature(X_test)
+    new_test = new_test.reshape([new_test.shape[0], new_test.shape[1] * new_test.shape[2]])
+    from step7_tree import test_xgb
+    test_xgb(new_train, Y_tr, new_test, Y_te)
+
+
+mlp1()
 
 
 def mlp2():
@@ -116,9 +129,7 @@ def mlp2():
     print('Test score:', score[0])
     print('Test accuracy:', score[1])
 
-
 # all_data = np.zeros((x.shape[0],feature_num))
 
 # can not be initial, because the first level is too huge
-mlp2()
-
+# mlp2()
