@@ -10,7 +10,7 @@ from sklearn.cross_validation import train_test_split
 X_train, X_test, Y_train, Y_test = train_test_split(x, y, test_size=0.33, random_state=713)
 
 
-# 0.421632
+# 0.4238 1000
 def test_rf():
     clf = RandomForestClassifier(n_estimators=1000)
     clf.fit(X_train, Y_train)
@@ -18,7 +18,7 @@ def test_rf():
     print metrics.accuracy_score(y_test, Y_test)
 
 
-# test_rf()
+test_rf()
 
 # 200,0.44；
 # 651 0.45
@@ -46,11 +46,12 @@ def test_xgb():
 
     train_Y = y
     print time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    set_y = set(train_Y)
+    set_y = set(y)
     param["num_class"] = len(set_y)
-    dtrain = xgb.DMatrix(x, label=y)
+    dtrain = xgb.DMatrix(X_train, label=Y_train)
+    dtest = xgb.DMatrix(X_test, label=Y_test)
     param['objective'] = 'multi:softmax'
-    xgb.cv(param, dtrain, 1200, nfold=3, show_progress=True)
+    xgb.train(param, dtrain, num_boost_round=1000, evals=[(dtrain, 'train'), (dtest, 'validate')])
     print time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 
