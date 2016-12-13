@@ -30,9 +30,31 @@ X_train, X_test, Y_train, Y_test = train_test_split(x, y_, test_size=0.33, rando
 # 18 epoch 0.4628, 20 dim two level
 # 18 epoch 0.4653, 20 dim three level 0.5 dropout
 # trainable=False 0.42
-def mlp():
-    print x.shape
-    exit()
+
+def mlp0():
+    model = Sequential()
+    model.add(Dense(len(set(y)), input_dim=x.shape[1]))
+    model.add(Activation('tanh'))
+    model.add(Dropout(0.5))
+    model.add(Dense(len(set(y))))
+    model.add(Activation('softmax'))
+    rms = RMSprop()
+    model.compile(loss='categorical_crossentropy', optimizer=rms, metrics=["accuracy"])
+    batch_size = 1024
+    nb_epoch = 300
+    model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
+              validation_data=(X_test, Y_test))
+    model.summary()
+    score = model.evaluate(X_test, Y_test)
+    print('Test score:', score[0])
+    print('Test accuracy:', score[1])
+
+
+mlp0()
+exit()
+
+
+def mlp1():
     # from keras.regularizers import l1
     model = Sequential()
     model.add(Embedding(x.max() + 1, 20, input_length=x.shape[1]))
@@ -53,9 +75,6 @@ def mlp():
     score = model.evaluate(X_test, Y_test)
     print('Test score:', score[0])
     print('Test accuracy:', score[1])
-
-
-mlp()
 
 
 def mlp2():
