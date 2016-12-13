@@ -50,8 +50,8 @@ def mlp0():
     print('Test accuracy:', score[1])
 
 
-mlp0()
-exit()
+# mlp0()
+
 
 
 def mlp1():
@@ -99,7 +99,7 @@ def mlp2():
     x = all_data
     X_train, X_test, Y_train, Y_test = train_test_split(x, y_, test_size=0.33, random_state=713)
     from keras.regularizers import l1
-    model.add(Dense(input_dim=x.shape[0], output_dim=len(set(y)), W_regularizer=l1(0.01)))
+    model.add(Dense(input_dim=x.shape[1], output_dim=len(set(y))))
     # model.add(Dense(128))
     # model.add(Activation('relu'))
     model.add(Dropout(0.5))
@@ -116,7 +116,9 @@ def mlp2():
     print('Test score:', score[0])
     print('Test accuracy:', score[1])
 
+
 # all_data = np.zeros((x.shape[0],feature_num))
 
 # can not be initial, because the first level is too huge
-# mlp2()
+mlp2()
+
