@@ -34,7 +34,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(x, y_, test_size=0.33, rando
 def mlp0():
     model = Sequential()
     model.add(Dense(len(set(y)), input_dim=x.shape[1]))
-    model.add(Activation('tanh'))
+    model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(len(set(y))))
     model.add(Activation('softmax'))
