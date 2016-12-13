@@ -1,9 +1,9 @@
 # encoding=utf8
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
+from sklearn_pandas import DataFrameMapper
 from sklearn.metrics import accuracy_score
 import sys
-from sklearn_pandas import DataFrameMapper
 import pandas as pd
 import util
 
