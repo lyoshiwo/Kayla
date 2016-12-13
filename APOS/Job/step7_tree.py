@@ -21,6 +21,7 @@ def test_rf():
 # test_rf()
 
 # 200,0.44；
+# 651 0.45
 def test_xgb():
     from sklearn import preprocessing
     enc = preprocessing.OneHotEncoder()
@@ -38,7 +39,7 @@ def test_xgb():
     param['min_child_weight'] = 10
     param['subsample'] = 0.7
     param['colsample_bytree'] = 0.2
-    param['nthread'] = 2
+    param['nthread'] = 3
     param['num_class'] = -1
     import xgboost as xgb
     import time
