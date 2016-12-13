@@ -31,9 +31,11 @@ X_train, X_test, Y_train, Y_test = train_test_split(x, y_, test_size=0.33, rando
 # 18 epoch 0.4653, 20 dim three level 0.5 dropout
 # trainable=False 0.42
 def mlp():
+    print x.shape
+    exit()
     # from keras.regularizers import l1
     model = Sequential()
-    model.add(Embedding(x.max() + 1, 20, input_length=x.shape[1], trainable=False))
+    model.add(Embedding(x.max() + 1, 20, input_length=x.shape[1]))
     model.add(Flatten())
     model.add(Dropout(0.5))
     model.add(Dense(128))

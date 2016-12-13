@@ -27,7 +27,7 @@ if __name__ == "__main__":
         write_dic(id_text, 'pickle/' + 'id_texts.pkl')
     id_text = read_dict('pickle/' + 'id_texts.pkl')
     texts = id_text.values()
-    features, words = 30, 14
+    features, words = 10, 14
     if os.path.exists('pickle/' + str(features) + 'features_1minwords_' + str(words) + 'text.pkl') is False:
         # Set values for various parameters
         num_features = features  # Word vector dimensionality
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         print "Training Word2Vec model..."
         model = Word2Vec(texts, workers=num_workers, \
                          size=num_features, min_count=min_word_count, \
-                         window=context, sample=down_sampling, seed=1, negative=1)
+                         window=context, sample=down_sampling, seed=1, negative=3)
         model.init_sims(replace=True)
         word2vec_path = 'pickle/' + str(features) + 'features_1minwords_' + str(words) + 'text.pkl'
         model.save(word2vec_path)

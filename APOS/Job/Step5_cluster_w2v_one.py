@@ -28,8 +28,8 @@ def train_w2vector(features, words, sentence_dict_path, word2vec_path):
     json_all = read_json(file_path_train)
     sentences = []
     level_zero = [u'size', u'salary']
-    level_two = [u'type', u'department', u'industry', u'position_name']
-    level_one = [u'major', u'gender']
+    level_two = [u'position_name']
+    level_one = [u'major', u'gender', u'age']
     dic_all = {}
     count2 = 0
     all = 0
@@ -70,6 +70,12 @@ def train_w2vector(features, words, sentence_dict_path, word2vec_path):
             except Exception, e:
                 sentence.append(u'm4')
         for z in level_one:
+            if z is u'age':
+                try:
+                    sentence.append(u'a' + str(i[u'age']))
+                except Exception, e:
+                    sentence.append(u'a24')
+                continue
             try:
                 if i[z] == None:
                     sentence.append(u'其他')
@@ -77,10 +83,6 @@ def train_w2vector(features, words, sentence_dict_path, word2vec_path):
                     sentence.append(i[z])
             except Exception, e:
                 print e.message
-        try:
-            sentence.append(u'a' + str(i[u'age']))
-        except Exception, e:
-            sentence.append(u'a24')
         dic_all.setdefault(id_one, sentence)
         sentences.append(sentence)
         # if u'软件工程师' in sentence:
@@ -103,7 +105,7 @@ def train_w2vector(features, words, sentence_dict_path, word2vec_path):
     print "Training Word2Vec model..."
     model = Word2Vec(sentences, workers=num_workers, \
                      size=num_features, min_count=min_word_count, \
-                     window=context, sample=downsampling, seed=1, negative=1)
+                     window=context, sample=downsampling, seed=1, negative=3)
 
     model.init_sims(replace=True)
     model.save(word2vec_path)
@@ -120,9 +122,9 @@ if __name__ == "__main__":
 
     w2c_f, w2c_w = 10, 14
     # output the id_sentences data to local, it is a dictionary. A sentence means a json resume
-    # sentence_dict_path = 'pickle/id_sentences.pkl'
-    # train_w2vector(w2c_f, w2c_w, sentence_dict_path, word2vec_path)
+    sentence_dict_path = 'pickle/id_sentences.pkl'
     word2vec_path = 'pickle/' + str(w2c_f) + 'features_1minwords_' + str(w2c_w) + 'context.pkl'
+    train_w2vector(w2c_f, w2c_w, sentence_dict_path, word2vec_path)
     model = Word2Vec.load(word2vec_path)
     c_key = model.vocab.keys()
     c_vec = [model[i] for i in c_key]
