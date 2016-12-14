@@ -16,7 +16,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(x, y, test_size=0.33, random
 
 
 # 0.4238 1000
-def test_rf():
+def test_rf(X_train=X_train, Y_train=Y_train, X_test=X_test, Y_test=Y_test):
     clf = RandomForestClassifier(n_estimators=300)
     clf.fit(X_train, Y_train)
     y_test = clf.predict(X_test)
@@ -50,4 +50,17 @@ def test_xgb(X_train=X_train, Y_train=Y_train, X_test=X_test, Y_test=Y_test):
     print time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 
-test_xgb()
+# test_xgb()
+def w2v_rf():
+    from step8_mlp import get_cluster_or_w2v_feature
+    w2v_feature = get_cluster_or_w2v_feature(cluster=True, w2v=False)
+    x = w2v_feature
+    # print len(x)
+    # print x[0].shape
+    # print x[:2]
+    X_train, X_test, Y_train, Y_test = train_test_split(x, y, test_size=0.33, random_state=713)
+    test_xgb(X_train=X_train, Y_train=Y_train, X_test=X_test, Y_test=Y_test)
+    # test_rf(X_train=X_train, Y_train=Y_train, X_test=X_test, Y_test=Y_test)
+
+
+w2v_rf()
