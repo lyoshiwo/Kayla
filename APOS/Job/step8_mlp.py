@@ -8,6 +8,7 @@ from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.optimizers import SGD, Adam, RMSprop
 from sklearn.cross_validation import train_test_split
 from keras.layers.embeddings import Embedding
+from gensim.models import Word2Vec
 import numpy as np
 import util
 
@@ -66,11 +67,12 @@ def mlp1():
     Y_tr, Y_te = train_test_split(y, test_size=0.33, random_state=713)
     # from keras.regularizers import l1
     import theano
+    print x.max() + 1
     model = Sequential()
     model.add(Embedding(x.max() + 1, 30, input_length=x.shape[1]))
     model.add(Flatten())
     model.add(Dropout(0.5))
-    model.add(Dense(128))
+    model.add(Dense(256))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(len(set(y))))
@@ -78,10 +80,11 @@ def mlp1():
     rms = RMSprop()
     model.compile(loss='categorical_crossentropy', optimizer=rms, metrics=["accuracy"])
     batch_size = 1024
-    nb_epoch = 12
+    nb_epoch = 25
     model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test))
     model.summary()
+    exit()
     score = model.evaluate(X_test, Y_test)
     print('Test score:', score[0])
     print('Test accuracy:', score[1])
@@ -147,7 +150,6 @@ def mlp2():
 def mlp3():
     import time
     print time.localtime()
-
     import theano
     model = Sequential()
     model.add(Embedding(x.max() + 1, 30, input_length=x.shape[1]))
@@ -208,7 +210,6 @@ def mlp3():
 
 # the first, the second, the last position
 def sentence_to_matrix_vec(sentence, model, featuresNum, k_mean_dict_1, k_mean_dict_2, cluster=False, w2v=True):
-    count = 0
     temp = np.zeros((featuresNum + 2) * (4 * 3 + 3))
     if sentence == None: return temp
     for i in range(-7, 2 * 4):
@@ -228,18 +229,6 @@ def get_cluster_or_w2v_feature(data=data, cluster=False, w2v=True):
     from gensim.models import Word2Vec
     cluster_one_64 = util.read_dict("pickle/cluster_one_128.pkl")
     cluster_two_64 = util.read_dict("pickle/cluster_two_128.pkl")
-    # print cluster_one_64.keys()
-    # print 'aa'
-    # sentence_dict_path = 'pickle/id_sentences.pkl'
-    # word2vec_path = 'pickle/' + str(10) + 'features_1minwords_' + str(14) + 'context.pkl'
-    # sentence_dic = util.read_dict(sentence_dict_path)
-    # sentences = sentence_dic.values()
-    # for i in sentences:
-    #     for z in i:
-    #         if cluster_one_64.has_key(z):
-    #             print cluster_one_64[z]
-    # exit()
-
     sentence_dict_path = 'pickle/id_sentences.pkl'
     word2vec_path = 'pickle/' + str(10) + 'features_1minwords_' + str(14) + 'context.pkl'
     sentence_dic = util.read_dict(sentence_dict_path)
@@ -250,3 +239,126 @@ def get_cluster_or_w2v_feature(data=data, cluster=False, w2v=True):
         feature = sentence_to_matrix_vec(sentence, model, 10, cluster_one_64, cluster_two_64, cluster=cluster, w2v=w2v)
         features.append(feature)
     return features
+
+
+def unsupervised_test(cluster=False, w2v=True):
+    w2v_feature = get_cluster_or_w2v_feature(cluster=cluster, w2v=w2v)
+    x = w2v_feature
+    x = np.matrix(x)
+    print x.shape
+    X_train, X_test, Y_train, Y_test = train_test_split(x, y_, test_size=0.33, random_state=713)
+    model = Sequential()
+    model.add(Dense(128, input_dim=x.shape[1]))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(128))
+    model.add(Dropout(0.5
+                      ))
+    model.add(Activation('relu'))
+    model.add(Dense(len(set(y))))
+    model.add(Activation('softmax'))
+    rms = RMSprop()
+    model.compile(loss='categorical_crossentropy', optimizer=rms, metrics=["accuracy"])
+    batch_size = 1024
+    nb_epoch = 20
+    model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch * 50,
+              validation_data=(X_test, Y_test))
+    model.summary()
+    score = model.evaluate(X_test, Y_test)
+    print('Test score:', score[0])
+    print('Test accuracy:', score[1])
+
+
+def unsupervised_test_cnn(cluster=False, w2v=True):
+    w2v_feature = get_cluster_or_w2v_feature(cluster=cluster, w2v=w2v)
+    x = np.array(w2v_feature)
+    print x.shape
+    x = x.reshape((x.shape[0], 1, 10, 18))
+    X_train, X_test, Y_train, Y_test = train_test_split(x, y_, test_size=0.33, random_state=713)
+    model = Sequential()
+    from keras.layers.convolutional import Convolution2D, MaxPooling2D
+    model.add(Convolution2D(32, 3, 3, input_shape=X_train.shape[1:]))
+    # model.add(Convolution1D(nb_filter=8,
+    #                         filter_length=2,
+    #                         border_mode='valid',
+    #                         activation='relu'))
+    model.add(MaxPooling2D(pool_size=(4, 2)))
+    model.add(Flatten())
+    model.add(Dense(1024))
+    model.add(Dropout(0.5))
+    model.add(Activation('relu'))
+    model.add(Dense(len(set(y))))
+    model.add(Activation('softmax'))
+
+    model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+    model.fit(X_train, Y_train, batch_size=1024, nb_epoch=20 * 15,
+              validation_data=(X_test, Y_test))
+    import time
+    print time.localtime()
+
+
+# unsupervised_test_cnn()
+
+def print_img():
+    sentence_dict_path = 'pickle/id_sentences.pkl'
+    sentence_dic = util.read_dict(sentence_dict_path)
+    print sentence_dic.values()[0]
+    sentence_small = []
+    for s in sentence_dic.values():
+        sentence_small.append([s[i] for i in range(len(s)) if
+                               i % 4 == 2 or i + 3 == len(s)][:-1])
+
+    num_features = 10  # Word vector dimensionality
+    min_word_count = 1  # Minimum word count
+    num_workers = 4  # Number of threads to run in parallel
+    context = 1  # Context window size
+    downsampling = 1e-2  # Downsample setting for frequent words
+
+    print "Training Word2Vec model..."
+    model = Word2Vec(sentence_small, workers=num_workers, \
+                     size=num_features, min_count=min_word_count, \
+                     window=context, sample=downsampling, seed=1, negative=-1)
+    print "print img"
+
+    new_x = []
+    new_y = []
+    for index, s in enumerate(sentence_small[:5000]):
+        if y[index] % 6 != 0:
+            continue
+        for v in s:
+            try:
+                vv = model[v]
+                new_x.append(vv)
+                new_y.append(y[index])
+            except:
+                continue
+
+    # vec = get_cluster_or_w2v_feature(data)
+    #
+    # for index, v in enumerate(vec):
+    #     if y[index] == 0 or y[index] == 5:
+    #         for i, k in enumerate(v.reshape((18, 10))):
+    #             if i != 4:
+    #                 continue
+    #             new_x.append(k)
+    #             new_y.append(y[index])
+    print len(new_x)
+    print len(new_y)
+    from sklearn.decomposition import PCA
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(10, 5))
+    plt.subplot(122)
+    import numpy as np
+    new_x = np.matrix(new_x)
+    X_pca = PCA().fit_transform(new_x)
+    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=new_y)
+
+    from sklearn.manifold import TSNE
+    X_tsne = TSNE(learning_rate=100).fit_transform(new_x)
+    plt.subplot(121)
+    plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=new_y)
+
+    plt.show()
+
+
+print_img()
