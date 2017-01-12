@@ -24,7 +24,8 @@ class DataProvider:
         self.random_state = random_state
 
     def manuel_feature(self):
-        [x_original, position, size, salary] = pd.read_pickle('pickle/manual_position_size_salary.pkl')
+        [self.x_original, position, size, salary] = pd.read_pickle('pickle/manual_position_size_salary.pkl')
+        x_original = self.x_original
         self.x_train_test['train'], self.x_train_test['test'] = train_test_split(x_original, test_size=self.test_size,
                                                                                  random_state=self.random_state)
         self.y['position']['train'], self.y['position']['test'] = train_test_split(position, test_size=self.test_size,
@@ -39,11 +40,16 @@ class DataProvider:
         """
         :return: one_hot_train_list, one_hot_test_list
         """
-
+        count = 0
+        import numpy as np
+        self.x_original = np.array(self.x_original)
+        for i in range(self.x_original.shape[1]):
+            count += self.x_original[:, i].max() + 1
+            self.x_original[:, i] += count
         enc = preprocessing.OneHotEncoder()
         enc.fit(self.x_original)
-        x = enc.transform(self.x_original)
-        return train_test_split(x, test_size=self.test_size, random_state=self.random_state)
+        self.x_original = enc.transform(self.x_original)
+        return train_test_split(self.x_original, test_size=self.test_size, random_state=self.random_state)
 
     def text_dict(self):
         import os

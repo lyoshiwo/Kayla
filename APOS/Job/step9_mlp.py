@@ -93,9 +93,6 @@ def mlp1():
     new_train = new_go.reshape([new_go.shape[0], new_go.shape[1] * new_go.shape[2]])
     new_test = get_feature(X_test)
     new_test = new_test.reshape([new_test.shape[0], new_test.shape[1] * new_test.shape[2]])
-    from step7_tree import test_xgb, test_rf
-    test_xgb(new_train, Y_tr, new_test, Y_te)
-    test_rf(new_train, Y_tr, new_test, Y_te)
     print 'end'
 
 

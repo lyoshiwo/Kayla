@@ -1,17 +1,15 @@
 #! /usr/bin/env python
 # -*- coding=utf-8 -*-
 # @Author Leo
-from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
-from sklearn import cross_validation, grid_search
+from sklearn import grid_search
 from matplotlib import pyplot as plt
 import numpy as np
-import pandas as pd
 
 param = dict()
 param['objective'] = 'multi:softmax'
 param['eta'] = 0.03
-param['max_depth'] = 8
+param['max_depth'] = 6
 param['eval_metric'] = 'merror'
 param['silent'] = 1
 param['min_child_weight'] = 10
@@ -23,14 +21,17 @@ param['num_class'] = -1
 
 # 0.4238 1000
 def test_rf(X_train, Y_train, X_test, Y_test):
-    clf = RandomForestClassifier(n_estimators=600)
+    print "test_rf"
+    n_estimators = 600
+    print 'n_estimators', n_estimators
+    clf = RandomForestClassifier(n_estimators=n_estimators)
     clf.fit(X_train, Y_train)
     y_predict = clf.predict(X_test)
     evaluation(Y_test, y_predict)
 
 
 def test_tf_cv(X_train, Y_train):
-    print 'rf'
+    print 'cv_rf'
     n_estimator = range(100, 301, 100)
     max_depth = range(5, 26, 1)
     clf = RandomForestClassifier(n_jobs=4)
@@ -59,7 +60,7 @@ def test_tf_cv(X_train, Y_train):
 def xgb_test_cv(X_train, Y_train):
     from pandas import Series
     import xgboost as xgb
-    from util import write_file,read_file
+    from util import write_file, read_file
     import os
     if os.path.exists('pkl/history,pkl') is False:
         set_y = set(Y_train)
@@ -74,7 +75,7 @@ def xgb_test_cv(X_train, Y_train):
         history8 = xgb.cv(param, dtrain, 500, nfold=3, verbose_eval=True)
         write_file([history4, history6, history8], 'pickle/history,pkl')
     else:
-        [history4, history6, history8]=read_file('pickle/history,pkl')
+        [history4, history6, history8] = read_file('pickle/history,pkl')
     test_error_list = Series(history4['test-merror-mean']).values[50:]
     plt.plot(range(51, len(test_error_list) + 1), test_error_list, 'b--')
     test_error_list = Series(history6['test-merror-mean']).values[50:]
@@ -87,10 +88,13 @@ def xgb_test_cv(X_train, Y_train):
     plt.xlabel('the number of boost round')
     plt.show()
 
+
 # test_rf()
 
 # 400 0.454 70-features
-def test_xgb(X_train, Y_train, X_test, Y_test, y):
+def test_xgb(X_train, Y_train, X_test, Y_test, y, name, boost_dict):
+    num_boost_round = boost_dict[name]
+    print 'test xgb'
     import xgboost as xgb
     import time
     print time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -99,7 +103,9 @@ def test_xgb(X_train, Y_train, X_test, Y_test, y):
     dtrain = xgb.DMatrix(X_train, label=Y_train)
     dtest = xgb.DMatrix(X_test, label=Y_test)
     param['objective'] = 'multi:softmax'
-    xgb_model = xgb.train(param, dtrain, num_boost_round=600)
+    # watchlist = [(dtest, 'test')]
+    # xgb_model = xgb.train(param, dtrain, num_boost_round=num_boost_round, evals=watchlist)
+    xgb_model = xgb.train(param, dtrain, num_boost_round=num_boost_round)
     y_predict = xgb_model.predict(dtest)
     evaluation(Y_test, y_predict)
 
@@ -107,26 +113,35 @@ def test_xgb(X_train, Y_train, X_test, Y_test, y):
 
 
 def evaluation(y_test, y_prediction):
-    from sklearn.metrics import recall_score
-    from sklearn.metrics import f1_score
     from sklearn.metrics import precision_score
     print 'precision: ', precision_score(y_test, y_prediction, average='micro')
-    print 'recall: ', recall_score(y_test, y_prediction, average='micro')
-    print 'f1 score: ', f1_score(y_test, y_prediction, average='micro')
+    print 'precision: ', precision_score(y_test, y_prediction, average='macro')
+
+
+def test_svm(X_train, Y_train, X_test, Y_test):
+    from sklearn.svm import LinearSVC
+    clf = LinearSVC(penalty='l1', dual=False, max_iter=3000, verbose=1)
+    clf.fit(X_train, Y_train)
+    Y_prediction = clf.predict(X_test)
+    evaluation(Y_test, Y_prediction)
 
 
 if __name__ == "__main__":
-    from step5_data_provider import DataProvider
+    from step6_data_provider import DataProvider
 
     d = DataProvider(random_state=713, test_size=0.33)
     d.manuel_feature()
-    for name in ['position', 'salary', 'size']:
+    X_train = d.x_train_test['train']
+    X_test = d.x_train_test['test']
+    X_hot_train, X_hot_test = d.one_hot()
+    boost_dict = {'size': 228, 'salary': 561, 'position': 380}
+    for name in ['position']:
+        print "*******************"
         print name
-        X_train = d.x_train_test['train']
         Y_train = d.y[name]['train']
-        X_test = d.x_train_test['test']
         Y_test = d.y[name]['test']
         y = d.y_original[name]
-        xgb_test_cv(X_train, Y_train)
-        test_xgb(X_train, Y_train, X_test, Y_test, y)
-        test_rf(X_train, Y_train, X_test, Y_test)
+        # xgb_test_cv(X_train, Y_train)
+        # test_xgb(X_train, Y_train, X_test, Y_test, y, name, boost_dict)
+        # test_rf(X_train, Y_train, X_test, Y_test)
+        test_svm(X_hot_train, Y_train, X_hot_test, Y_test)
