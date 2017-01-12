@@ -217,6 +217,16 @@ def write_dic(obj, file_path):
     except Exception, e:
         print e.message
 
+def write_file(obj, file_path):
+    try:
+        file_w = open(file_path, 'w')
+        import pickle
+
+        pickle.dump(obj, file_w)
+        file_w.close()
+    except Exception, e:
+        print e.message
+
 
 # 读取json 文件
 def read_json(inputJsonFile):
