@@ -159,8 +159,8 @@ def mlp3():
     model.add(Activation('softmax'))
     rms = RMSprop()
     model.compile(loss='categorical_crossentropy', optimizer=rms, metrics=["accuracy"])
-    batch_size = 1024
-    nb_epoch = 12
+    batch_size = 256
+    nb_epoch = 9
     model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test))
     model.summary()
@@ -173,27 +173,27 @@ def mlp3():
     print new_train.shape
     new_test = get_feature(X_test)
     new_test = new_test.reshape((new_test.shape[0], 1, new_test.shape[1], new_test.shape[2]))
-    print new_test.shape
-    # build a 2D model
-    from keras.layers.convolutional import Convolution1D, Convolution2D, MaxPooling2D
-    print 'building model'
-    model = Sequential()
-    model.add(Convolution2D(32, 3, 3, input_shape=new_train.shape[1:]))
-    # model.add(Convolution1D(nb_filter=8,
-    #                         filter_length=2,
-    #                         border_mode='valid',
-    #                         activation='relu'))
-    model.add(MaxPooling2D(pool_size=(4, 2)))
-    model.add(Flatten())
-    model.add(Dense(128))
-    model.add(Dropout(0.5))
-    model.add(Activation('relu'))
-    model.add(Dense(len(set(y))))
-    model.add(Activation('softmax'))
-
-    model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
-    model.fit(new_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch * 5,
-              validation_data=(new_test, Y_test))
+    # print new_test.shape
+    # # build a 2D model
+    # from keras.layers.convolutional import Convolution1D, Convolution2D, MaxPooling2D
+    # print 'building model'
+    # model = Sequential()
+    # model.add(Convolution2D(32, 3, 3, input_shape=new_train.shape[1:]))
+    # # model.add(Convolution1D(nb_filter=8,
+    # #                         filter_length=2,
+    # #                         border_mode='valid',
+    # #                         activation='relu'))
+    # model.add(MaxPooling2D(pool_size=(4, 2)))
+    # model.add(Flatten())
+    # model.add(Dense(128))
+    # model.add(Dropout(0.5))
+    # model.add(Activation('relu'))
+    # model.add(Dense(len(set(y))))
+    # model.add(Activation('softmax'))
+    #
+    # model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+    # model.fit(new_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch * 5,
+    #           validation_data=(new_test, Y_test))
     print time.localtime()
 
     print 'saved model'
@@ -299,12 +299,6 @@ def unsupervised_test_cnn(cluster=False, w2v=True):
 def print_img():
     sentence_dict_path = 'pickle/id_sentences.pkl'
     sentence_dic = util.read_dict(sentence_dict_path)
-    print sentence_dic.values()[0]
-    sentence_small = []
-    for s in sentence_dic.values():
-        sentence_small.append([s[i] for i in range(len(s)) if
-                               i % 4 == 2 or i + 3 == len(s)][:-1])
-
     num_features = 10  # Word vector dimensionality
     min_word_count = 1  # Minimum word count
     num_workers = 4  # Number of threads to run in parallel
@@ -312,33 +306,25 @@ def print_img():
     downsampling = 1e-2  # Downsample setting for frequent words
 
     print "Training Word2Vec model..."
-    model = Word2Vec(sentence_small, workers=num_workers, \
+    model = Word2Vec(sentences=sentence_dic.values(), workers=num_workers, \
                      size=num_features, min_count=min_word_count, \
                      window=context, sample=downsampling, seed=1, negative=-1)
     print "print img"
-
+    # print '\xe7\x89\xa9\xe6\xb5\x81\xe7\xae\xa1\xe7\x90\x86'
+    # print model[u'size7']
+    position_name_list = [u'物流专员',
+                          u'采购经理',
+                          u'开发工程师',
+                          u'会计',
+                          u'后勤专员',
+                          u'运营专员',
+                          u'人力资源专员']
     new_x = []
     new_y = []
-    for index, s in enumerate(sentence_small[:5000]):
-        if y[index] % 6 != 0:
-            continue
-        for v in s:
-            try:
-                vv = model[v]
-                new_x.append(vv)
-                new_y.append(y[index])
-            except:
-                continue
-
-    # vec = get_cluster_or_w2v_feature(data)
-    #
-    # for index, v in enumerate(vec):
-    #     if y[index] == 0 or y[index] == 5:
-    #         for i, k in enumerate(v.reshape((18, 10))):
-    #             if i != 4:
-    #                 continue
-    #             new_x.append(k)
-    #             new_y.append(y[index])
+    for index, i in enumerate(position_name_list):
+        for temp in [m[0] for m in model.most_similar(i, topn=400)]:
+            new_x.append(model[temp])
+            new_y.append(index)
     print len(new_x)
     print len(new_y)
     from sklearn.decomposition import PCA
@@ -359,3 +345,43 @@ def print_img():
 
 
 print_img()
+
+# new_x = []
+# new_y = []
+# for index, s in enumerate(sentence_small[:5000]):
+#     if y[index] % 6 != 0:
+#         continue
+#     for v in s:
+#         try:
+#             vv = model[v]
+#             new_x.append(vv)
+#             new_y.append(y[index])
+#         except:
+#             continue
+#
+# # vec = get_cluster_or_w2v_feature(data)
+# #
+# # for index, v in enumerate(vec):
+# #     if y[index] == 0 or y[index] == 5:
+# #         for i, k in enumerate(v.reshape((18, 10))):
+# #             if i != 4:
+# #                 continue
+# #             new_x.append(k)
+# #             new_y.append(y[index])
+# print len(new_x)
+# print len(new_y)
+# from sklearn.decomposition import PCA
+# import matplotlib.pyplot as plt
+# plt.figure(figsize=(10, 5))
+# plt.subplot(122)
+# import numpy as np
+# new_x = np.matrix(new_x)
+# X_pca = PCA().fit_transform(new_x)
+# plt.scatter(X_pca[:, 0], X_pca[:, 1], c=new_y)
+#
+# from sklearn.manifold import TSNE
+# X_tsne = TSNE(learning_rate=100).fit_transform(new_x)
+# plt.subplot(121)
+# plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=new_y)
+#
+# plt.show()

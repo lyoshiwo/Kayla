@@ -20,9 +20,8 @@ param['num_class'] = -1
 
 
 # 0.4238 1000
-def test_rf(X_train, Y_train, X_test, Y_test):
+def test_rf(X_train, Y_train, X_test, Y_test, n_estimators=600):
     print "test_rf"
-    n_estimators = 600
     print 'n_estimators', n_estimators
     clf = RandomForestClassifier(n_estimators=n_estimators)
     clf.fit(X_train, Y_train)
@@ -128,12 +127,21 @@ def test_svm(X_train, Y_train, X_test, Y_test):
 
 if __name__ == "__main__":
     from step6_data_provider import DataProvider
+    from sklearn.cross_validation import train_test_split
 
     d = DataProvider(random_state=713, test_size=0.33)
-    d.manuel_feature()
     X_train = d.x_train_test['train']
     X_test = d.x_train_test['test']
     X_hot_train, X_hot_test = d.one_hot()
+    X_embedding = d.w2v_feature()
+    X_embedding_train, X_embedding_test = train_test_split(X_embedding, test_size=d.test_size,
+                                                           random_state=d.random_state)
+    print X_train.shape, X_embedding_train.shape
+    # useless
+    # X_train = np.concatenate([X_train, X_embedding_train], axis=1)
+    # X_test = np.concatenate([X_test, X_embedding_test], axis=1)
+    # X_hot_train = np.concatenate([X_hot_train, X_embedding_train], axis=1)
+    # X_hot_test = np.concatenate([X_hot_test, X_embedding_test], axis=1)
     boost_dict = {'size': 228, 'salary': 561, 'position': 380}
     for name in ['position']:
         print "*******************"
@@ -141,7 +149,7 @@ if __name__ == "__main__":
         Y_train = d.y[name]['train']
         Y_test = d.y[name]['test']
         y = d.y_original[name]
-        # xgb_test_cv(X_train, Y_train)
+        xgb_test_cv(X_train, Y_train)
         # test_xgb(X_train, Y_train, X_test, Y_test, y, name, boost_dict)
         # test_rf(X_train, Y_train, X_test, Y_test)
-        test_svm(X_hot_train, Y_train, X_hot_test, Y_test)
+        # test_svm(X_hot_train, Y_train, X_hot_test, Y_test)

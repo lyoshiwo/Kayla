@@ -221,7 +221,6 @@ def write_file(obj, file_path):
     try:
         file_w = open(file_path, 'w')
         import pickle
-
         pickle.dump(obj, file_w)
         file_w.close()
     except Exception, e:
